@@ -1,0 +1,36 @@
+{
+  "name": "@docamz/json-tokenizer",
+  "version": "1.0.0",
+  "description": "Lightweight JSON tokenizer with symmetric dictionary encoding for compression and optimization",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "json",
+    "tokenizer",
+    "compression",
+    "dictionary",
+    "typescript"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/docamz/json-tokenizer-lib.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^4.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
