@@ -1,0 +1,40 @@
+# Source files (since you're publishing dist/)
+src/
+
+# Tests
+tests/
+
+# Development files
+tsconfig.json
+.gitignore
+.npmignore
+
+# Documentation (optional - you might want to include README.md)
+README.MD
+
+# Development dependencies and config
+node_modules/
+.npm/
+.nyc_output/
+coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log

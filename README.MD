@@ -31,7 +31,7 @@ city
 ```typescript
 import * as fs from "fs";
 import * as path from "path";
-import { generateDictionary } from "@yourname/json-tokenizer";
+import { generateDictionary } from "@docamz/json-tokenizer";
 
 // Load keys from a file or define them directly
 const keysPath = path.join(__dirname, "dictionnaries/dict.txt");
@@ -54,7 +54,7 @@ fs.writeFileSync(outputPath, JSON.stringify(dictionary, null, 2), 'utf-8');
 ```typescript
 import * as fs from "fs";
 import * as path from "path";
-import { tokenize, detokenize } from "@yourname/json-tokenizer";
+import { tokenize, detokenize } from "@docamz/json-tokenizer";
 
 const dictPath = path.join(__dirname, './dictionnaries/core-v1.dictionary.json');
 const raw = fs.readFileSync(dictPath, 'utf-8');

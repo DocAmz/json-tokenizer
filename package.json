@@ -20,11 +20,11 @@
     "dictionary",
     "typescript"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "DocAmz",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/docamz/json-tokenizer-lib.git"
+    "url": "https://github.com/DocAmz/json-tokenizer.git"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
