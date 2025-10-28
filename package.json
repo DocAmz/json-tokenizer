@@ -1,7 +1,7 @@
 {
   "name": "@docamz/json-tokenizer",
-  "version": "1.0.0",
-  "description": "Lightweight JSON tokenizer with symmetric dictionary encoding for compression and optimization",
+  "version": "2.0.0",
+  "description": "Lightweight JSON tokenizer with multiple encoding strategies (alphabetic, numeric, base64, UUID, custom) for compression and optimization",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -18,7 +18,13 @@
     "tokenizer",
     "compression",
     "dictionary",
-    "typescript"
+    "typescript",
+    "alphabetic",
+    "numeric",
+    "base64",
+    "uuid",
+    "encoding",
+    "optimization"
   ],
   "author": "DocAmz",
   "license": "MIT",

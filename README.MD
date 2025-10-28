@@ -1,81 +1,224 @@
 # @docamz/json-tokenizer
 
-Lightweight and symmetric JSON tokenizer for compression and optimization.
-Generates consistent dictionaries and supports reversible tokenization.
-Can be used standalone or with MessagePack or Gzip for enhanced compression.
+🚀 **Advanced JSON tokenizer with multiple encoding strategies** for optimal compression and performance.
+
+Lightweight and symmetric JSON tokenizer for compression and optimization. Generates consistent dictionaries and supports  **alphabetic**, **numeric**, **base64**, **UUID-based**, and **custom** tokenization methods with symmetric encoding/decoding. Perfect for data compression, API optimization, and storage efficiency. Can be used standalone or with MessagePack or Gzip for enhanced compression.
+
+## Features
+
+- **Multiple Tokenization Methods**: Alphabetic, numeric, base64, UUID-short, and custom
+- **Symmetric Encoding**: Perfect reconstruction of original data
+- **High Performance**: Optimized algorithms with minimal overhead
+- **TypeScript Support**: Full type safety
 
 ---
 
-### 🚀 Install
+## Installation
 
 ```bash
 npm install @docamz/json-tokenizer
-
 ```
 
-### 🔧 Usage
-
-#### Create a dictionary
-
-If you have a predefined set of keys, you can create a dictionary as follows:
-Create a text file `dictionnaries/dict.txt` with the following content:
-
-```text
-name
-age
-city
-```
-
-#### Generate dictionary from keys
+## Quick Start
 
 ```typescript
-import * as fs from "fs";
-import * as path from "path";
-import { generateDictionary } from "@docamz/json-tokenizer";
+import { generateDictionary, tokenize, detokenize, TokenizationMethod } from "@docamz/json-tokenizer";
 
-// Load keys from a file or define them directly
-const keysPath = path.join(__dirname, "dictionnaries/dict.txt");
-const name = "myDict-v1";
+const data = { name: "Alice", age: 30, city: "Paris" };
+const keys = ["name", "age", "city"];
 
-// Example keys file content:
-const keys = fs.readFileSync(keysPath, 'utf-8').split(/\r?\n/).filter(Boolean);
-
-// Generate dictionary
+// Generate dictionary and tokenize
 const dict = generateDictionary(keys);
+const encoded = tokenize(data, dict.forward);
+const decoded = detokenize(encoded, dict.reverse);
 
-//write dictionary to files
-const outputPath = path.join(__dirname, `${name}.dictionary.json`);
-fs.writeFileSync(outputPath, JSON.stringify(dictionary, null, 2), 'utf-8');
-
+console.log(encoded); // { a: "Alice", b: 30, c: "Paris" }
+console.log(decoded); // { name: "Alice", age: 30, city: "Paris" }
 ```
 
-#### Tokenize and detokenize JSON
+## Tokenization Methods
+
+### 1. Alphabetic (Default)
+
+Perfect for maximum compression with readable tokens.
 
 ```typescript
-import * as fs from "fs";
-import * as path from "path";
-import { tokenize, detokenize } from "@docamz/json-tokenizer";
-
-const dictPath = path.join(__dirname, './dictionnaries/core-v1.dictionary.json');
-const raw = fs.readFileSync(dictPath, 'utf-8');
-const dict = JSON.parse(raw) as Dictionary;
-
-// Example data to tokenize
-const data     = { name: "Alice", age: 30, city: "Paris" };
-const encoded  = tokenize(data, dict.forward);
-const decoded  = detokenize(encoded, dict.reverse);
-
-console.log(encoded); // { a: 'Alice', b: 30, c: 'Paris' }
-console.log(decoded); // { name: 'Alice', age: 30, city: 'Paris' }
+const dict = generateDictionary(keys, { method: TokenizationMethod.ALPHABETIC });
+// Result: { name: "a", age: "b", city: "c" }
 ```
 
-### API
+### 2. Numeric
 
-| Function                        | Description                      |
-| ------------------------------- | -------------------------------- |
-| `generateDictionary(keys)`      | Generate a reversible dictionary |
-| `tokenize(obj, dict.forward)`   | Replace JSON keys with tokens    |
-| `detokenize(obj, dict.reverse)` | Restore original JSON keys       |
+Simple numeric tokens for databases and APIs.
+
+```typescript
+const dict = generateDictionary(keys, { method: TokenizationMethod.NUMERIC });
+// Result: { name: "0", age: "1", city: "2" }
+```
+
+### 3. Padded Numeric
+
+Fixed-width numeric tokens for consistent formatting.
+
+```typescript
+const dict = generateDictionary(keys, {
+  method: TokenizationMethod.PADDED_NUMERIC,
+  paddingLength: 3
+});
+// Result: { name: "000", age: "001", city: "002" }
+```
+
+### 4. Base64 Style
+
+High-density encoding using alphanumeric + symbols.
+
+```typescript
+const dict = generateDictionary(keys, { method: TokenizationMethod.BASE64 });
+// Supports 64 characters: a-z, A-Z, 0-9, _, $
+// Result: { name: "a", age: "b", city: "c", ... key63: "$", key64: "ba" }
+```
+
+### 5. UUID Short
+
+Distributed-system friendly with timestamp + counter.
+
+```typescript
+const dict = generateDictionary(keys, { method: TokenizationMethod.UUID_SHORT });
+// Result: { name: "1a2b00", age: "1a2b01", city: "1a2b02" }
+// Format: 4-char timestamp + 2-char counter (6 chars total)
+```
+
+### 6. Custom Generator
+
+Define your own tokenization logic.
+
+```typescript
+const dict = generateDictionary(keys, {
+  method: TokenizationMethod.CUSTOM,
+  customGenerator: (index) => `custom_${index}`
+});
+// Result: { name: "custom_0", age: "custom_1", city: "custom_2" }
+```
+
+### 7. Prefixed Tokens
+
+Add prefixes to any tokenization method.
+
+```typescript
+const dict = generateDictionary(keys, {
+  method: TokenizationMethod.NUMERIC,
+  prefix: "api_"
+});
+// Result: { name: "api_0", age: "api_1", city: "api_2" }
+```
+
+## Advanced Usage
+
+### Complex Nested Objects
+
+```typescript
+const complexData = {
+  user: {
+    profile: { firstName: "John", lastName: "Doe", email: "john@example.com" },
+    settings: { theme: "dark", language: "en", notifications: true }
+  },
+  metadata: { version: "2.0", createdAt: "2023-01-01T00:00:00Z" }
+};
+
+const keys = [
+  "user", "profile", "firstName", "lastName", "email",
+  "settings", "theme", "language", "notifications",
+  "metadata", "version", "createdAt"
+];
+
+const dict = generateDictionary(keys, { method: TokenizationMethod.ALPHABETIC });
+const encoded = tokenize(complexData, dict.forward);
+const decoded = detokenize(encoded, dict.reverse);
+
+// Perfect reconstruction guaranteed
+console.log(decoded === complexData); // true
+```
+
+### Arrays of Objects
+
+```typescript
+const arrayData = {
+  users: [
+    { name: "Alice", age: 30, role: "admin" },
+    { name: "Bob", age: 25, role: "user" },
+    { name: "Charlie", age: 35, role: "moderator" }
+  ]
+};
+
+const keys = ["users", "name", "age", "role"];
+const dict = generateDictionary(keys, { method: TokenizationMethod.BASE64 });
+const encoded = tokenize(arrayData, dict.forward);
+// Result: { a: [{ b: "Alice", c: 30, d: "admin" }, ...] }
+```
+
+### Dictionary Serialization
+
+```typescript
+// Save dictionary for later use
+const dict = generateDictionary(keys, { method: TokenizationMethod.ALPHABETIC });
+const serialized = JSON.stringify(dict);
+fs.writeFileSync('dictionary.json', serialized);
+
+// Load and use dictionary
+const loaded = JSON.parse(fs.readFileSync('dictionary.json', 'utf-8'));
+const decoded = detokenize(encodedData, loaded.reverse);
+```
+
+## API Reference
+
+### Core Functions
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `generateDictionary(keys, options?)` | `keys: string[]`, `options?: TokenizationOptions` | Generate tokenization dictionary |
+| `tokenize(obj, dict)` | `obj: any`, `dict: Record<string, string>` | Replace keys with tokens |
+| `detokenize(obj, reverse)` | `obj: any`, `reverse: Record<string, string>` | Restore original keys |
+
+### Tokenization Methods reference
+
+| Method | Description | Use Case |
+|--------|-------------|----------|
+| `ALPHABETIC` | a, b, c, ..., z, aa, ab | Maximum compression, readable |
+| `NUMERIC` | 0, 1, 2, 3, ... | Simple, database-friendly |
+| `PADDED_NUMERIC` | 000, 001, 002, ... | Fixed-width, sortable |
+| `BASE64` | a-z, A-Z, 0-9, _, $ | High-density encoding |
+| `UUID_SHORT` | timestamp + counter | Distributed systems |
+| `CUSTOM` | User-defined function | Custom requirements |
+
+### TokenizationOptions
+
+```typescript
+interface TokenizationOptions {
+  method?: TokenizationMethod;           // Default: ALPHABETIC
+  customGenerator?: (index: number) => string; // For CUSTOM method
+  paddingLength?: number;                // Default: 4 (for PADDED_NUMERIC)
+  prefix?: string;                       // Default: "" (empty)
+}
+```
+
+### Sequence Generators
+
+Access individual generators directly:
+
+```typescript
+import {
+  generateAlphabeticSequence,
+  generateNumericSequence,
+  generatePaddedNumericSequence,
+  generateBase64Sequence,
+  generateUuidShortSequence
+} from "@docamz/json-tokenizer";
+
+// Use specific generators
+const token1 = generateAlphabeticSequence(0); // "a"
+const token2 = generateBase64Sequence(63);    // "$"
+const token3 = generateUuidShortSequence(0);  // "1a2b00"
+```
 
 ### Benchmarks
 
@@ -90,6 +233,7 @@ console.log(decoded); // { name: 'Alice', age: 30, city: 'Paris' }
 | **Average** | - | **66.8%** | **52.4%** | **62.1%** | **78.4%** | **53.7%** | **0.32/0.40 ms** | **0.53/0.40 ms** | **0.15/0.19 ms** |
 
 **Key:**
+
 - Raw→Tok: Tokenization compression ratio
 - Tok+Gzip: Tokenized with Gzip compression
 - MsgPack: MessagePack compression ratio
@@ -97,6 +241,6 @@ console.log(decoded); // { name: 'Alice', age: 30, city: 'Paris' }
 - Tok+Msg+Gzip: Best compression (tokenization + MessagePack + Gzip)
 - Enc/Dec: Encoding/Decoding performance in milliseconds
 
-### 📄 License
+### License
 
 MIT License © 2025 DocAmz
