@@ -1,5 +1,6 @@
 import { Dictionary, TokenizationMethod, TokenizationOptions } from "./types";
 import { generateKeySequence } from "./utils/sequenceGenerator";
+import { isSafeKey } from "./security";
 
 /**
  * Generates a symmetric dictionary for tokenization and detokenization.
@@ -41,12 +42,46 @@ export const generateDictionary = (
   options: TokenizationOptions = {}
 ): Dictionary => {
   const { method = TokenizationMethod.ALPHABETIC, prefix = "" } = options;
+
+  // Validate input keys for security
+  if (!Array.isArray(keys)) {
+    throw new Error('Keys must be provided as an array');
+  }
+
+  for (const key of keys) {
+    if (typeof key !== 'string') {
+      throw new Error(`All keys must be strings, got ${typeof key}: ${key}`);
+    }
+    if (!isSafeKey(key)) {
+      throw new Error(`Unsafe key detected in input: "${key}". This key could lead to prototype pollution.`);
+    }
+  }
+
+  // Validate prefix if provided
+  if (prefix && typeof prefix !== 'string') {
+    throw new Error(`Prefix must be a string, got ${typeof prefix}`);
+  }
+
   const forward: Record<string, string> = {};
   const reverse: Record<string, string> = {};
 
   keys.forEach((key, index) => {
     const baseToken = generateKeySequence(index, method, options);
     const token = prefix + baseToken;
+
+    // Validate that the generated token is safe
+    if (!isSafeKey(token)) {
+      throw new Error(`Generated token "${token}" for key "${key}" is not safe. Consider using a different tokenization method or prefix.`);
+    }
+
+    // Check for duplicate tokens
+    if (forward[key] !== undefined) {
+      throw new Error(`Duplicate key detected: "${key}"`);
+    }
+    if (reverse[token] !== undefined) {
+      throw new Error(`Token collision detected: "${token}" would be assigned to multiple keys`);
+    }
+
     forward[key] = token;
     reverse[token] = key;
   });

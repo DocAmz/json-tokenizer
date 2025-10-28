@@ -8,6 +8,7 @@ Lightweight and symmetric JSON tokenizer for compression and optimization. Gener
 
 - **Multiple Tokenization Methods**: Alphabetic, numeric, base64, UUID-short, and custom
 - **Symmetric Encoding**: Perfect reconstruction of original data
+- **🔒 Security First**: Built-in prototype pollution protection
 - **High Performance**: Optimized algorithms with minimal overhead
 - **TypeScript Support**: Full type safety
 
@@ -168,6 +169,35 @@ fs.writeFileSync('dictionary.json', serialized);
 const loaded = JSON.parse(fs.readFileSync('dictionary.json', 'utf-8'));
 const decoded = detokenize(encodedData, loaded.reverse);
 ```
+
+## 🔒 Security Features
+
+**Built-in protection against prototype pollution and security vulnerabilities:**
+
+```typescript
+import { tokenize, sanitizeObject, isSafeKey } from "@docamz/json-tokenizer";
+
+// Automatic protection against dangerous keys
+const maliciousData = { name: "Alice", "__proto__": { isAdmin: true } };
+tokenize(maliciousData, dict.forward); // Throws: "Dangerous key detected"
+
+// Sanitize untrusted input
+const cleanData = sanitizeObject(untrustedInput, { throwOnUnsafeKeys: true });
+
+// Validate keys manually
+if (isSafeKey(keyName)) {
+  // Safe to use
+}
+```
+
+**Protected against:**
+
+- `__proto__` pollution
+- `constructor` manipulation
+- Dangerous property access
+- Control character injection
+
+> 📖 **See [SECURITY.md](./SECURITY.md) for complete security guide**
 
 ## API Reference
 
