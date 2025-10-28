@@ -252,15 +252,66 @@ const token3 = generateUuidShortSequence(0);  // "1a2b00"
 
 ### Benchmarks
 
+- **model1.json** (83.8 KB file) 2679 Row - 216 unique keys dict
+- **model2.json** (134.4 KB file) 4069 Row - 216 unique keys dict
+- **model3.json** (148.7 KB file) 4424 Row - 216 unique keys dict
+- **model4.json** (33.1 file) 1056 Row - 216 unique keys dict
+
+this files contains complex nested structures and arrays, their values are multiples(boolean, url, text, numbers..) to simulate real-world JSON data.
+
+#### Compression Ratios
+
+Compression Benchmarks for Different Tokenization Methods on model3.json (148.7 KB file) 4424 Row - 216 unique keys :
+
+| Method | Dict Gen | Tokenize | Total | Original | Tokenized | Compression | Saved |
+|--------|----------|----------|-------|----------|-----------|-------------|-------|
+| alphabetic | 0.00 ms | 112.28 ms | 112.28 ms | 72.14 KB | 49.26 KB | 31.71% | 22.87 KB |
+| base64 | 0.00 ms | 111.24 ms | 111.24 ms | 72.14 KB | 48.70 KB | 32.49% | 23.44 KB |
+| numeric | 0.00 ms | 113.88 ms | 113.88 ms | 72.14 KB | 51.52 KB | 28.58% | 20.62 KB |
+| padded_numeric | 0.00 ms | 127.31 ms | 127.31 ms | 72.14 KB | 56.87 KB | 21.17% | 15.27 KB |
+| uuid_short | 0.00 ms | 113.00 ms | 113.00 ms | 72.14 KB | 63.82 KB | 11.53% | 8.31 KB |
+
+FASTEST TOKENIZATION:
+
+1. base64: 111.24 ms
+2. alphabetic: 112.28 ms
+3. uuid_short: 113.00 ms
+4. numeric: 113.88 ms
+5. padded_numeric: 127.31 ms
+
+BEST COMPRESSION:
+
+1. base64: 32.49% (23.44 KB saved)
+2. alphabetic: 31.71% (22.87 KB saved)
+3. numeric: 28.58% (20.62 KB saved)
+4. padded_numeric: 21.17% (15.27 KB saved)
+5. uuid_short: 11.53% (8.31 KB saved)
+
+MOST SPACE SAVED:
+
+1. base64: 23.44 KB
+2. alphabetic: 22.87 KB
+3. numeric: 20.62 KB
+4. padded_numeric: 15.27 KB
+5. uuid_short: 8.31 KB
+
+EFFICIENCY SCORE (Compression/Time):
+
+1. base64: 0.2921 (32.49% in 111.24 ms)
+2. alphabetic: 0.2824 (31.71% in 112.28 ms)
+3. numeric: 0.2510 (28.58% in 113.88 ms)
+4. padded_numeric: 0.1663 (21.17% in 127.31 ms)
+5. uuid_short: 0.1020 (11.53% in 113.00 ms)
+
 #### Benchmark Results
 
 | Model | Raw Size | Raw→Tok | Tok+Gzip | MsgPack | Tok+Msg | Tok+Msg+Gzip | Tok Enc/Dec | Msg Enc/Dec | Tok+Msg Enc/Dec |
 |-------|----------|---------|----------|---------|---------|--------------|-------------|-------------|------------------|
-| model1.json | 83.8 KB | 64.6% | 55.5% | 60.3% | 76.3% | 55.5% | 0.4/0.5 ms | 1.3/0.8 ms | 0.2/0.2 ms |
-| model2.json | 134.4 KB | 65.7% | 51.8% | 61.3% | 77.2% | 55.7% | 0.5/0.6 ms | 0.3/0.4 ms | 0.2/0.2 ms |
-| model3.json | 148.7 KB | 66.9% | 56.5% | 62.7% | 78.0% | 57.4% | 0.3/0.3 ms | 0.3/0.3 ms | 0.2/0.2 ms |
-| model4.json | 33.1 KB | 69.9% | 45.6% | 64.1% | 82.2% | 46.2% | 0.1/0.1 ms | 0.2/0.1 ms | 0.1/0.1 ms |
-| **Average** | - | **66.8%** | **52.4%** | **62.1%** | **78.4%** | **53.7%** | **0.32/0.40 ms** | **0.53/0.40 ms** | **0.15/0.19 ms** |
+| model1.json | 83.8 KB | 64.6% | 55.5% | 60.3% | 76.3% | 55.5% | 86.5/74.6 ms | 1.3/0.8 ms | 87.1/72.3 ms |
+| model2.json | 134.4 KB | 65.7% | 51.8% | 61.3% | 77.2% | 55.7% | 103.9/105.9 ms | 0.3/0.4 ms | 104.2/106.5 ms |
+| model3.json | 148.7 KB | 66.9% | 56.5% | 62.7% | 78.0% | 57.4% | 113.4/116.5 ms | 0.3/0.3 ms | 113.7/115.0 ms |
+| model4.json | 33.1 KB | 69.9% | 45.6% | 64.1% | 82.2% | 46.2% | 28.1/28.6 ms | 0.2/0.1 ms | 28.1/27.5 ms |
+| **Average** | - | **66.8%** | **52.4%** | **62.1%** | **78.4%** | **53.7%** | **82.9/81.4 ms** | **0.53/0.40 ms** | **83.28/80.3 ms** |
 
 **Key:**
 
