@@ -11,6 +11,7 @@ Lightweight and symmetric JSON tokenizer for compression and optimization. Gener
 - **🔒 Security First**: Built-in prototype pollution protection
 - **High Performance**: Optimized algorithms with minimal overhead
 - **TypeScript Support**: Full type safety
+- **⚛️ React Hook API**: First-class React support with `useJsonTokenizer` hook
 
 ---
 
@@ -35,6 +36,218 @@ const decoded = detokenize(encoded, dict.reverse);
 
 console.log(encoded); // { a: "Alice", b: 30, c: "Paris" }
 console.log(decoded); // { name: "Alice", age: 30, city: "Paris" }
+```
+
+## React Hook API
+
+⚛️ **React Hook for seamless integration with React applications**
+
+### Installation
+
+The React hook requires React 16.8.0 or higher (for hooks support):
+
+```bash
+npm install @docamz/json-tokenizer react
+```
+
+### Basic Usage
+
+```tsx
+import { useJsonTokenizer, TokenizationMethod } from "@docamz/json-tokenizer/react";
+
+function MyComponent() {
+  const data = { name: "Alice", age: 30, city: "Paris" };
+  
+  const { tokenized, dictionary, isLoading, error } = useJsonTokenizer(data, {
+    keys: ["name", "age", "city"],
+    method: TokenizationMethod.ALPHABETIC
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <div>
+      <h3>Original:</h3>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+      
+      <h3>Tokenized:</h3>
+      <pre>{JSON.stringify(tokenized, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### Manual Control
+
+Disable auto-tokenization and control when tokenization happens:
+
+```tsx
+function ManualComponent() {
+  const [data, setData] = useState({ name: "Alice", age: 30 });
+  
+  const { tokenized, tokenize, detokenize, reset } = useJsonTokenizer(data, {
+    keys: ["name", "age"],
+    autoTokenize: false  // Don't tokenize automatically
+  });
+
+  return (
+    <div>
+      <button onClick={tokenize}>Tokenize</button>
+      <button onClick={() => detokenize(tokenized)}>Detokenize</button>
+      <button onClick={reset}>Reset</button>
+      <pre>{JSON.stringify(tokenized, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### With Different Tokenization Methods
+
+```tsx
+function TokenizationMethodsExample() {
+  const data = { name: "Alice", age: 30, city: "Paris" };
+  
+  // Numeric tokenization
+  const numeric = useJsonTokenizer(data, {
+    keys: ["name", "age", "city"],
+    method: TokenizationMethod.NUMERIC
+  });
+  
+  // Base64 tokenization
+  const base64 = useJsonTokenizer(data, {
+    keys: ["name", "age", "city"],
+    method: TokenizationMethod.BASE64
+  });
+
+  return (
+    <div>
+      <h3>Numeric: {JSON.stringify(numeric.tokenized)}</h3>
+      <h3>Base64: {JSON.stringify(base64.tokenized)}</h3>
+    </div>
+  );
+}
+```
+
+### Custom Tokenization
+
+```tsx
+function CustomTokenization() {
+  const data = { name: "Alice", age: 30, city: "Paris" };
+  
+  const { tokenized } = useJsonTokenizer(data, {
+    keys: ["name", "age", "city"],
+    method: TokenizationMethod.CUSTOM,
+    customGenerator: (index) => `field_${index}`
+  });
+
+  return <pre>{JSON.stringify(tokenized, null, 2)}</pre>;
+}
+```
+
+### Using Pre-generated Dictionary
+
+For consistent tokenization across multiple components:
+
+```tsx
+import { generateDictionary } from "@docamz/json-tokenizer";
+
+// Generate dictionary once (e.g., in a context or constant)
+const SHARED_DICTIONARY = generateDictionary(
+  ["name", "age", "city"],
+  { method: TokenizationMethod.ALPHABETIC }
+);
+
+function ComponentA() {
+  const { tokenized } = useJsonTokenizer(
+    { name: "Alice", age: 30, city: "Paris" },
+    { dictionary: SHARED_DICTIONARY }
+  );
+  return <pre>{JSON.stringify(tokenized)}</pre>;
+}
+
+function ComponentB() {
+  const { tokenized } = useJsonTokenizer(
+    { name: "Bob", age: 25, city: "London" },
+    { dictionary: SHARED_DICTIONARY }
+  );
+  return <pre>{JSON.stringify(tokenized)}</pre>;
+}
+```
+
+### React Hook API Reference
+
+#### `useJsonTokenizer(input, options)`
+
+**Parameters:**
+- `input`: `any` - The JSON data to tokenize
+- `options`: `UseJsonTokenizerOptions` - Configuration options
+
+**Options:**
+```typescript
+interface UseJsonTokenizerOptions {
+  keys?: string[];              // Keys to include in dictionary generation
+  dictionary?: Dictionary;       // Pre-generated dictionary (overrides keys)
+  autoTokenize?: boolean;        // Auto-tokenize on input change (default: true)
+  method?: TokenizationMethod;   // Tokenization method (default: ALPHABETIC)
+  customGenerator?: (index: number) => string;  // For custom method
+  paddingLength?: number;        // For padded numeric method
+  prefix?: string;               // Prefix for tokens
+}
+```
+
+**Returns:**
+```typescript
+interface UseJsonTokenizerResult {
+  tokenized: any;               // The tokenized data
+  detokenized: any;             // The original/detokenized data
+  dictionary: Dictionary | null; // The dictionary used
+  isLoading: boolean;           // Loading state
+  error: Error | null;          // Any error that occurred
+  tokenize: () => void;         // Manually trigger tokenization
+  detokenize: (data: any) => any; // Manually detokenize data
+  reset: () => void;            // Reset state
+}
+```
+
+### SSR Considerations
+
+The `useJsonTokenizer` hook is safe for Server-Side Rendering (SSR):
+
+- No browser-specific APIs are used
+- Works in Next.js, Remix, and other SSR frameworks
+- Dictionary generation happens synchronously
+- No side effects during initial render (when `autoTokenize` is false)
+
+**Example with Next.js:**
+
+```tsx
+// pages/tokenize.tsx
+import { useJsonTokenizer, TokenizationMethod } from "@docamz/json-tokenizer/react";
+
+export default function TokenizePage() {
+  const data = { name: "Alice", age: 30 };
+  
+  const { tokenized, isLoading } = useJsonTokenizer(data, {
+    keys: ["name", "age"],
+    method: TokenizationMethod.ALPHABETIC
+  });
+
+  return <pre>{JSON.stringify(tokenized, null, 2)}</pre>;
+}
+```
+
+### TypeScript Support
+
+The React hook exports are fully typed:
+
+```typescript
+import type { 
+  UseJsonTokenizerOptions, 
+  UseJsonTokenizerResult,
+  Dictionary,
+  TokenizationMethod 
+} from "@docamz/json-tokenizer/react";
 ```
 
 ## Tokenization Methods
