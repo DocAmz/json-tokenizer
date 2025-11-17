@@ -42,7 +42,7 @@ console.log(decoded); // { name: "Alice", age: 30, city: "Paris" }
 
 ⚛️ **React Hook for seamless integration with React applications**
 
-### Installation
+### Installation (Hook)
 
 The React hook requires React 16.8.0 or higher (for hooks support):
 
@@ -57,7 +57,7 @@ import { useJsonTokenizer, TokenizationMethod } from "@docamz/json-tokenizer/rea
 
 function MyComponent() {
   const data = { name: "Alice", age: 30, city: "Paris" };
-  
+
   const { tokenized, dictionary, isLoading, error } = useJsonTokenizer(data, {
     keys: ["name", "age", "city"],
     method: TokenizationMethod.ALPHABETIC
@@ -70,7 +70,7 @@ function MyComponent() {
     <div>
       <h3>Original:</h3>
       <pre>{JSON.stringify(data, null, 2)}</pre>
-      
+
       <h3>Tokenized:</h3>
       <pre>{JSON.stringify(tokenized, null, 2)}</pre>
     </div>
@@ -85,7 +85,7 @@ Disable auto-tokenization and control when tokenization happens:
 ```tsx
 function ManualComponent() {
   const [data, setData] = useState({ name: "Alice", age: 30 });
-  
+
   const { tokenized, tokenize, detokenize, reset } = useJsonTokenizer(data, {
     keys: ["name", "age"],
     autoTokenize: false  // Don't tokenize automatically
@@ -107,13 +107,13 @@ function ManualComponent() {
 ```tsx
 function TokenizationMethodsExample() {
   const data = { name: "Alice", age: 30, city: "Paris" };
-  
+
   // Numeric tokenization
   const numeric = useJsonTokenizer(data, {
     keys: ["name", "age", "city"],
     method: TokenizationMethod.NUMERIC
   });
-  
+
   // Base64 tokenization
   const base64 = useJsonTokenizer(data, {
     keys: ["name", "age", "city"],
@@ -134,7 +134,7 @@ function TokenizationMethodsExample() {
 ```tsx
 function CustomTokenization() {
   const data = { name: "Alice", age: 30, city: "Paris" };
-  
+
   const { tokenized } = useJsonTokenizer(data, {
     keys: ["name", "age", "city"],
     method: TokenizationMethod.CUSTOM,
@@ -180,10 +180,12 @@ function ComponentB() {
 #### `useJsonTokenizer(input, options)`
 
 **Parameters:**
+
 - `input`: `any` - The JSON data to tokenize
 - `options`: `UseJsonTokenizerOptions` - Configuration options
 
 **Options:**
+
 ```typescript
 interface UseJsonTokenizerOptions {
   keys?: string[];              // Keys to include in dictionary generation
@@ -197,6 +199,7 @@ interface UseJsonTokenizerOptions {
 ```
 
 **Returns:**
+
 ```typescript
 interface UseJsonTokenizerResult {
   tokenized: any;               // The tokenized data
@@ -227,7 +230,7 @@ import { useJsonTokenizer, TokenizationMethod } from "@docamz/json-tokenizer/rea
 
 export default function TokenizePage() {
   const data = { name: "Alice", age: 30 };
-  
+
   const { tokenized, isLoading } = useJsonTokenizer(data, {
     keys: ["name", "age"],
     method: TokenizationMethod.ALPHABETIC
@@ -242,11 +245,11 @@ export default function TokenizePage() {
 The React hook exports are fully typed:
 
 ```typescript
-import type { 
-  UseJsonTokenizerOptions, 
+import type {
+  UseJsonTokenizerOptions,
   UseJsonTokenizerResult,
   Dictionary,
-  TokenizationMethod 
+  TokenizationMethod
 } from "@docamz/json-tokenizer/react";
 ```
 
