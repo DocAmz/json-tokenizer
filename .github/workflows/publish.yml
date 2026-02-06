@@ -36,11 +36,13 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          EVENT_TYPE: ${{ github.event_name }}
+          NPM_TAG: ${{ github.event.inputs.npm-tag || 'latest' }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            npm publish --tag "${{ github.event.inputs.npm-tag }}" --provenance --access public
+          if [ "$EVENT_TYPE" = "workflow_dispatch" ]; then
+            npm publish --tag "$NPM_TAG" --provenance --access public
           else
             npm publish --tag latest --provenance --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
